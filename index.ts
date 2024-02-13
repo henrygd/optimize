@@ -1,5 +1,5 @@
 import { Glob } from 'bun'
-import { stat } from 'node:fs/promises'
+import { statSync, existsSync } from 'node:fs'
 import { optimize_image } from './optimize'
 import { get_kilobytes, get_megabytes } from './util'
 
@@ -13,6 +13,22 @@ const QUIET = process.env.QUIET
 
 const search_dir = './images'
 const glob = new Glob(`**/*.{${EXTENSIONS}}`)
+
+// exit if required directory is not found
+function check_that_dir_exists(dir: string) {
+	if (!existsSync(dir)) {
+		console.log(
+			`\x1b[31m${dir.replace(
+				'.',
+				''
+			)} directory not found. Please make sure you have mounted it.\x1b[0m`
+		)
+		process.exit(1)
+	}
+}
+
+// check that /images directory is mounted
+check_that_dir_exists(search_dir)
 
 let total_files = 0
 let total_bytes_saved = 0
@@ -32,6 +48,8 @@ switch (MODE) {
 /** Overwrite existing images (default) */
 async function mode_overwrite() {
 	const backup_dir = './backup'
+	// check that backup directory exists
+	check_that_dir_exists(backup_dir)
 
 	for await (const f of glob.scan(search_dir)) {
 		const full_path = `${search_dir}/${f}`
@@ -44,7 +62,7 @@ async function mode_overwrite() {
 
 		// skip if creation time is more than MAX_AGE
 		if (MAX_AGE) {
-			const { ctimeMs } = await stat(full_path)
+			const { ctimeMs } = statSync(full_path)
 			// skip if creation is more than IMG_AGE
 			if (performance.timeOrigin - ctimeMs > Number(MAX_AGE) * 60 * 60 * 1000) {
 				continue
