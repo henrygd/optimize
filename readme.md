@@ -20,10 +20,10 @@ docker run --rm -v ./images:/images -v ./backup:/backup -e MODE=restore bun-vips
 
 ---
 
-`copy`: Write images to different directory, maintaining structure. This example converts all images to AVIF.
+`copy`: Write images to different directory, maintaining structure. This example converts all images to WEBP.
 
 ```
-docker run --rm -v ./images:/images -v ./optimized:/optimized -e MODE=copy -e FORMAT=avif bun-vips
+docker run --rm -v ./images:/images -v ./optimized:/optimized -e MODE=copy -e FORMAT=webp bun-vips
 ```
 
 ## Environment Variables
