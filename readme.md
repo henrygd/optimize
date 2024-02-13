@@ -4,19 +4,19 @@ Dockerized script to optimize images using [libvips](https://github.com/libvips/
 
 ## Modes
 
-- `overwrite`: Overwrite existing images. Backup directory recommended but not required.
+`overwrite`: Overwrite existing images (default). Backup directory recommended but not required.
 
 ```
 docker run --rm -v ./images:/images -v ./backup:/backup bun-vips
 ```
 
-- `restore`: Restore original images from backup (reverses `overwrite`).
+`restore`: Restore original images from backup (reverses `overwrite`).
 
 ```
 docker run --rm -v ./images:/images -v ./backup:/backup -e MODE=restore bun-vips
 ```
 
-- `copy`: Write images to different directory, maintaining structure. This example converts all images to AVIF.
+`copy`: Write images to different directory, maintaining structure. This example converts all images to AVIF.
 
 ```
 docker run --rm -v ./images:/images -v ./optimized:/optimized -e MODE=copy -e FORMAT=avif bun-vips
