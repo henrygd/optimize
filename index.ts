@@ -69,8 +69,6 @@ switch (MODE) {
 /** Overwrite existing images (default) */
 async function mode_overwrite() {
 	const backup_dir = './backup'
-	// check that backup directory exists
-	check_that_dir_exists(backup_dir)
 
 	for await (const f of glob.scan(search_dir)) {
 		const full_path = `${search_dir}/${f}`
@@ -100,6 +98,7 @@ async function mode_overwrite() {
 /** Restore original images from backup directory */
 async function mode_restore() {
 	const backup_dir = './backup'
+	check_that_dir_exists(backup_dir)
 
 	for await (const f of glob.scan(backup_dir)) {
 		const backup_file = Bun.file(`${backup_dir}/${f}`)
