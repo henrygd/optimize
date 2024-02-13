@@ -4,7 +4,9 @@ Dockerized script to optimize images using [libvips](https://github.com/libvips/
 
 ## Modes
 
-`overwrite`: Overwrite existing images (default). Backup directory recommended but not required.
+`overwrite`: Overwrite existing images (default).
+
+Mount the directory you want to scan to `/images` and mount the backup directory to `/backup`.
 
 ```
 docker run --rm -v ./images:/images -v ./backup:/backup bun-vips
@@ -50,6 +52,6 @@ docker run --rm -v ./images:/images -v ./optimized:/optimized -e MODE=copy -e FO
 - `fill`: Ignore the aspect ratio of the input and stretch to both provided dimensions.
 - `outside`: Preserving aspect ratio, resize the image to be as small as possible while ensuring its dimensions are greater than or equal to both those specified.
 
-[^1]: MAX_AGE should be a number if set. For example, `23` would only optimize images created in the last 23 hours.
-[^2]: This applies only to newly created files. Overwritten files should maintain existing permissions. Value should be compatible with a chown command.
+[^1]: MAX_AGE should be a number. For example, `23` would only optimize images created in the last 23 hours.
+[^2]: This applies only to newly created files. Overwritten files should maintain existing permissions. Value should use IDs. For example: `-e OWNER=1000:1000`, or `-e OWNER="$(id -u):$(id -g)"`.
 [^3]: This will force all optimized images to be converted to the specified format. Possible values: `webp`, `avif`.
