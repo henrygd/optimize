@@ -4,7 +4,7 @@ WORKDIR /
 
 RUN apk add --no-cache vips
 
-COPY package.json bun.lockb index.ts optimize.ts ./
+COPY package.json bun.lockb *.ts ./
 
 RUN bun install --production
 
