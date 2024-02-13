@@ -1,5 +1,7 @@
 Dockerized script to optimize images using [libvips](https://github.com/libvips/libvips) / [sharp](https://github.com/lovell/sharp) / [bun](https://bun.sh).
 
+![example terminal command output: Total: 5.36MB saved from 4 images](https://henrygd-assets.b-cdn.net/optimize/example.png)
+
 ## Modes
 
 `overwrite`: Overwrite existing images (default).
