@@ -10,11 +10,15 @@ Dockerized script to optimize images using [libvips](https://github.com/libvips/
 docker run --rm -v ./images:/images -v ./backup:/backup bun-vips
 ```
 
+---
+
 `restore`: Restore original images from backup (reverses `overwrite`).
 
 ```
 docker run --rm -v ./images:/images -v ./backup:/backup -e MODE=restore bun-vips
 ```
+
+---
 
 `copy`: Write images to different directory, maintaining structure. This example converts all images to AVIF.
 
