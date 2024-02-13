@@ -1,5 +1,6 @@
-import { Glob } from 'bun'
-import { statSync, existsSync } from 'node:fs'
+import { BunFile, Glob } from 'bun'
+import { existsSync } from 'node:fs'
+import { mkdir, stat } from 'node:fs/promises'
 import { optimize_image } from './optimize'
 import { get_kilobytes, get_megabytes } from './util'
 
@@ -27,6 +28,25 @@ function check_that_dir_exists(dir: string) {
 	}
 }
 
+/** Check if a file meets the specified criteria to optimize */
+async function file_meets_criteria(opts: { path: string; file: BunFile }) {
+	// false if size is less than MIN_SIZE
+	if (opts.file.size < MIN_SIZE * 1024) {
+		return false
+	}
+
+	// false if creation time is more than MAX_AGE
+	if (MAX_AGE) {
+		const { ctimeMs } = await stat(opts.path)
+		// skip if creation is more than IMG_AGE
+		if (performance.timeOrigin - ctimeMs > Number(MAX_AGE) * 60 * 60 * 1000) {
+			return false
+		}
+	}
+
+	return true
+}
+
 // check that /images directory is mounted
 check_that_dir_exists(search_dir)
 
@@ -41,7 +61,7 @@ switch (MODE) {
 		await mode_restore()
 		break
 	case 'copy':
-		// await mode_copy()
+		await mode_copy()
 		break
 }
 
@@ -55,18 +75,9 @@ async function mode_overwrite() {
 		const full_path = `${search_dir}/${f}`
 		const original_file = Bun.file(full_path)
 
-		// skip if size is less than MIN_SIZE
-		if (original_file.size < MIN_SIZE * 1024) {
+		const is_valid = await file_meets_criteria({ path: full_path, file: original_file })
+		if (!is_valid) {
 			continue
-		}
-
-		// skip if creation time is more than MAX_AGE
-		if (MAX_AGE) {
-			const { ctimeMs } = statSync(full_path)
-			// skip if creation is more than IMG_AGE
-			if (performance.timeOrigin - ctimeMs > Number(MAX_AGE) * 60 * 60 * 1000) {
-				continue
-			}
 		}
 
 		const backup_file = `${backup_dir}/${f}`
@@ -110,7 +121,43 @@ async function mode_restore() {
 	console.log(`\n\x1b[32mTotal: ${total_files} images restored\x1b[0m`)
 }
 
-async function mode_copy() {}
+async function mode_copy() {
+	const output_dir = './optimized'
+	check_that_dir_exists(output_dir)
+
+	for await (const f of glob.scan(search_dir)) {
+		const full_path = `${search_dir}/${f}`
+		const original_file = Bun.file(full_path)
+
+		const is_valid = await file_meets_criteria({ path: full_path, file: original_file })
+		if (!is_valid) {
+			continue
+		}
+
+		// create output directory if necessary
+		const file_output_dir = full_path
+			.replace(search_dir, output_dir)
+			.split('/')
+			.slice(0, -1)
+			.join('/')
+		if (!existsSync(file_output_dir)) {
+			await mkdir(file_output_dir, { recursive: true })
+		}
+
+		const bytes_saved = await optimize_image({
+			input_file: full_path,
+			output_file: `${output_dir}/${f}`,
+			log: !QUIET,
+		})
+		total_bytes_saved += bytes_saved
+		bytes_saved && total_files++
+	}
+
+	// chown the output directory to the correct user
+	if (OWNER) {
+		await Bun.$`chown -R ${OWNER} ${output_dir}`
+	}
+}
 
 // log the total bytes saved
 if (total_bytes_saved && total_files) {

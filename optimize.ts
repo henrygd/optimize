@@ -6,13 +6,19 @@ const QUALITY = Number(process.env.QUALITY || 80)
 const MAX_WIDTH = Number(process.env.MAX_WIDTH || 2200)
 const MAX_HEIGHT = Number(process.env.MAX_HEIGHT || 2400)
 const FIT = (process.env.FIT || 'inside') as keyof FitEnum
-
-// const format = (process.env.FORMAT || 'webp') as keyof FormatEnum
+const FORMAT = process.env.FORMAT
 
 interface OptimizeOptions {
 	input_file: string
 	output_file: string
 	log?: boolean
+}
+
+const get_format = (input_file: string): keyof FormatEnum => {
+	if (process.env.MODE === 'copy' && FORMAT) {
+		return FORMAT as keyof FormatEnum
+	}
+	return input_file.split('.').at(-1)?.toLowerCase() as keyof FormatEnum
 }
 
 /** Optimize an image with the given options. */
@@ -22,7 +28,8 @@ export async function optimize_image({
 	log = true,
 }: OptimizeOptions): Promise<number> {
 	try {
-		const format = input_file.split('.').at(-1)?.toLowerCase() as keyof FormatEnum
+		const format = get_format(input_file)
+		output_file = `${output_file.replace(/\.[^.]+$/, `.${format}`)}`
 		await sharp(input_file)
 			.resize({
 				fit: FIT,
