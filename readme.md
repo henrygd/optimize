@@ -1,5 +1,3 @@
-# WIP
-
 Dockerized script to optimize images using [libvips](https://github.com/libvips/libvips) / [sharp](https://github.com/lovell/sharp) / [bun](https://bun.sh).
 
 ## Modes
