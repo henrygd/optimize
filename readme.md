@@ -22,7 +22,7 @@ docker run --rm -v ./images:/images -v ./backup:/backup -e MODE=restore henrygd/
 
 ---
 
-`copy`: Write images to different directory, maintaining structure. This example converts all images to WEBP.
+`copy`: Write images to different directory. This example converts all images to WEBP.
 
 ```
 docker run --rm -v ./images:/images -v ./optimized:/optimized -e MODE=copy -e FORMAT=webp henrygd/optimize
