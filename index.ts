@@ -52,6 +52,7 @@ check_that_dir_exists(search_dir)
 
 let total_files = 0
 let total_bytes_saved = 0
+let directories_to_chown: string[] = []
 
 switch (MODE) {
 	case 'overwrite':
@@ -92,10 +93,8 @@ async function mode_overwrite() {
 		bytes_saved && total_files++
 	}
 
-	// chown the backup folder to the correct user
-	if (OWNER) {
-		await Bun.$`chown -R ${OWNER} ${backup_dir}`
-	}
+	// chown backup directory
+	directories_to_chown.push(backup_dir)
 }
 
 /** Restore original images from backup directory */
@@ -154,9 +153,12 @@ async function mode_copy() {
 	}
 
 	// chown the output directory to the correct user
-	if (OWNER) {
-		await Bun.$`chown -R ${OWNER} ${output_dir}`
-	}
+	directories_to_chown.push(output_dir)
+}
+
+// chown the directories if required
+if (OWNER && directories_to_chown.length) {
+	await Bun.$`chown -R ${OWNER} ${directories_to_chown.join(' ')}`
 }
 
 // log the total bytes saved
