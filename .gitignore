@@ -1,0 +1,11 @@
+/images
+/unoptimized
+/unoptimized*
+/backup
+/optimized
+/node_modules
+.idea
+*.jpg
+*.webp
+*.avif
+*.png
