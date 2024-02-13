@@ -1,9 +1,9 @@
 import { Glob } from 'bun'
 import { stat } from 'node:fs/promises'
 import { optimize_image } from './optimize'
-import { get_megabytes } from './util'
+import { get_kilobytes, get_megabytes } from './util'
 
-const MODE = (process.env.MODE || 'optimize') as 'overwrite' | 'copy' | 'restore'
+const MODE = (process.env.MODE || 'overwrite') as 'overwrite' | 'copy' | 'restore'
 const EXTENSIONS =
 	process.env.EXTENSIONS || 'jpg,JPG,jpeg,JPEG,png,PNG,gif,GIF,webp,WEBP,tif,TIF,tiff,TIFF'
 const MIN_SIZE = Number(process.env.MIN_SIZE || 800)
@@ -21,14 +21,15 @@ switch (MODE) {
 	case 'overwrite':
 		await mode_overwrite()
 		break
+	case 'restore':
+		await mode_restore()
+		break
 	case 'copy':
 		// await mode_copy()
 		break
-	case 'restore':
-		// await mode_restore()
-		break
 }
 
+/** Overwrite existing images (default) */
 async function mode_overwrite() {
 	const backup_dir = './backup'
 
@@ -67,6 +68,31 @@ async function mode_overwrite() {
 		await Bun.$`chown -R ${OWNER} ${backup_dir}`
 	}
 }
+
+/** Restore original images from backup directory */
+async function mode_restore() {
+	const backup_dir = './backup'
+
+	for await (const f of glob.scan(backup_dir)) {
+		const backup_file = Bun.file(`${backup_dir}/${f}`)
+		const destination_file = Bun.file(`${search_dir}/${f}`)
+		if (!QUIET) {
+			console.log(
+				`${destination_file.name} \x1b[32m${get_kilobytes(
+					destination_file.size
+				)}kB \u2192 ${get_kilobytes(backup_file.size)}kB (${Math.trunc(
+					(backup_file.size / destination_file.size) * 100
+				)}%) \x1b[0m`
+			)
+		}
+		await Bun.write(destination_file, backup_file)
+		total_files++
+	}
+
+	console.log(`\n\x1b[32mTotal: ${total_files} images restored\x1b[0m`)
+}
+
+async function mode_copy() {}
 
 // log the total bytes saved
 if (total_bytes_saved && total_files) {
