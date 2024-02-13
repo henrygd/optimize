@@ -46,7 +46,7 @@ export async function optimize_image({
 		const original_file = Bun.file(input_file)
 		if (log) {
 			console.log(
-				`${optimized_file.name} \x1b[32m${get_kilobytes(
+				`${original_file.name} \x1b[32m${get_kilobytes(
 					original_file.size
 				)}kB \u2192 ${get_kilobytes(optimized_file.size)}kB (${Math.trunc(
 					(optimized_file.size / original_file.size) * 100
