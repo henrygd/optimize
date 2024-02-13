@@ -9,7 +9,7 @@ Dockerized script to optimize images using [libvips](https://github.com/libvips/
 Mount the directory you want to scan to `/images` and mount the backup directory to `/backup`.
 
 ```
-docker run --rm -v ./images:/images -v ./backup:/backup bun-vips
+docker run --rm -v ./images:/images -v ./backup:/backup henrygd/optimize
 ```
 
 ---
@@ -17,7 +17,7 @@ docker run --rm -v ./images:/images -v ./backup:/backup bun-vips
 `restore`: Restore original images from backup (reverses `overwrite`).
 
 ```
-docker run --rm -v ./images:/images -v ./backup:/backup -e MODE=restore bun-vips
+docker run --rm -v ./images:/images -v ./backup:/backup -e MODE=restore henrygd/optimize
 ```
 
 ---
@@ -25,7 +25,7 @@ docker run --rm -v ./images:/images -v ./backup:/backup -e MODE=restore bun-vips
 `copy`: Write images to different directory, maintaining structure. This example converts all images to WEBP.
 
 ```
-docker run --rm -v ./images:/images -v ./optimized:/optimized -e MODE=copy -e FORMAT=webp bun-vips
+docker run --rm -v ./images:/images -v ./optimized:/optimized -e MODE=copy -e FORMAT=webp henrygd/optimize
 ```
 
 ## Environment Variables
