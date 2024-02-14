@@ -35,8 +35,8 @@ docker run --rm -v ./images:/images -v ./optimized:/optimized -e MODE=copy -e FO
 | EXTENSIONS | \*   | Extensions to optimize[^extensions] | jpg,jpeg,png,gif,webp,tif,tiff |
 | MIN_SIZE   | \*   | Size threshold in kilobytes[^size]  | unset                          |
 | MAX_AGE    | \*   | Age threshold in hours[^age]        | unset                          |
-| MAX_WIDTH  | \*   | Max width of output image           | 2200                           |
-| MAX_HEIGHT | \*   | Max height of output image          | 2400                           |
+| MAX_WIDTH  | \*   | Max width of output image           | 2800                           |
+| MAX_HEIGHT | \*   | Max height of output image          | 2800                           |
 | FIT        | \*   | [Fit method](#fit-methods)          | inside                         |
 | OWNER      | \*   | Ownership of new files[^owner]      | root:root                      |
 | QUIET      | \*   | Will not log every file             | unset                          |
