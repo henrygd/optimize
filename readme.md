@@ -4,9 +4,7 @@ Dockerized script to optimize images using [libvips](https://github.com/libvips/
 
 ## Modes
 
-`overwrite`: Overwrite existing images (default).
-
-Mount the directory you want to scan to `/images` and mount the backup directory to `/backup`.
+`overwrite`: Overwrite existing images (default). Scans the directory mounted to `/images`.
 
 ```
 docker run --rm -v ./images:/images -v ./backup:/backup henrygd/optimize
@@ -14,7 +12,7 @@ docker run --rm -v ./images:/images -v ./backup:/backup henrygd/optimize
 
 ---
 
-`restore`: Restore original images from backup (reverses `overwrite`).
+`restore`: Restore original images from backup (reverses last `overwrite` operation).
 
 ```
 docker run --rm -v ./images:/images -v ./backup:/backup -e MODE=restore henrygd/optimize
