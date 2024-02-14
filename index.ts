@@ -2,11 +2,10 @@ import { BunFile, Glob } from 'bun'
 import { existsSync } from 'node:fs'
 import { mkdir, stat } from 'node:fs/promises'
 import { optimize_image } from './optimize'
-import { get_kilobytes, get_megabytes } from './util'
+import { get_kilobytes, get_megabytes, get_mode } from './util'
 
 const { MIN_SIZE, MAX_AGE, OWNER, QUIET } = process.env
-
-const MODE = (process.env.MODE || 'overwrite') as 'overwrite' | 'copy' | 'restore'
+const MODE = get_mode()
 let EXTENSIONS = process.env.EXTENSIONS || 'jpg,jpeg,png,gif,webp,tif,tiff'
 
 // add upper case extensions

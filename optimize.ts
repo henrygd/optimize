@@ -1,5 +1,5 @@
 import sharp, { FitEnum, FormatEnum } from 'sharp'
-import { get_kilobytes } from './util'
+import { get_kilobytes, get_mode } from './util'
 
 // set options for sharp
 const QUALITY = Number(process.env.QUALITY || 80)
@@ -42,18 +42,17 @@ export async function optimize_image({
 			})
 			.toFile(output_file)
 		// log the size difference of the files
-		const optimized_file = Bun.file(output_file)
-		const original_file = Bun.file(input_file)
+		const bf_input_file = Bun.file(input_file)
+		const bf_output_file = Bun.file(output_file)
 		if (log) {
+			const log_file = get_mode() === 'overwrite' ? bf_output_file : bf_input_file
 			console.log(
-				`${original_file.name} \x1b[32m${get_kilobytes(
-					original_file.size
-				)}kB \u2192 ${get_kilobytes(optimized_file.size)}kB (${Math.trunc(
-					(optimized_file.size / original_file.size) * 100
-				)}%) \x1b[0m`
+				`${log_file.name} \x1b[32m${get_kilobytes(bf_input_file.size)}kB \u2192 ${get_kilobytes(
+					bf_output_file.size
+				)}kB (${Math.trunc((bf_output_file.size / bf_input_file.size) * 100)}%) \x1b[0m`
 			)
 		}
-		return original_file.size - optimized_file.size
+		return bf_input_file.size - bf_output_file.size
 	} catch (error) {
 		console.log(error)
 		return 0

@@ -15,3 +15,8 @@ export function get_kilobytes(bytes: number): string {
 export function get_megabytes(bytes: number): string {
 	return (bytes / 1024 / 1024).toLocaleString(undefined, { maximumFractionDigits: 2 })
 }
+
+/** Get the current optimization mode */
+export function get_mode() {
+	return (process.env.MODE || 'overwrite') as 'overwrite' | 'copy' | 'restore'
+}
