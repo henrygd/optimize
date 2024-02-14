@@ -20,3 +20,8 @@ export function get_megabytes(bytes: number): string {
 export function get_mode() {
 	return (process.env.MODE || 'overwrite') as 'overwrite' | 'copy' | 'restore'
 }
+
+/** Pluralize a string based on a number */
+export function pluralize(n: number, thing: string) {
+	return `${n} ${n === 1 ? thing : `${thing}s`}`
+}

@@ -2,7 +2,7 @@ import { BunFile, Glob } from 'bun'
 import { existsSync } from 'node:fs'
 import { mkdir, stat, unlink } from 'node:fs/promises'
 import { optimize_image } from './optimize'
-import { get_kilobytes, get_megabytes, get_mode } from './util'
+import { get_kilobytes, get_megabytes, get_mode, pluralize } from './util'
 
 const { MIN_SIZE, MAX_AGE, OWNER, QUIET } = process.env
 const MODE = get_mode()
@@ -125,7 +125,7 @@ async function mode_restore() {
 		total_files++
 	}
 
-	console.log(`\n\x1b[32mTotal: ${total_files} images restored\x1b[0m`)
+	console.log(`\n\x1b[32mTotal: ${pluralize(total_files, 'image')} restored\x1b[0m`)
 }
 
 async function mode_copy() {
@@ -172,6 +172,9 @@ if (OWNER && directories_to_chown.length) {
 // log the total bytes saved
 if (total_bytes_saved && total_files) {
 	console.log(
-		`\n\x1b[32mTotal: ${get_megabytes(total_bytes_saved)}MB saved from ${total_files} images\x1b[0m`
+		`\n\x1b[32mTotal: ${get_megabytes(total_bytes_saved)}MB saved from ${pluralize(
+			total_files,
+			'image'
+		)}\x1b[0m`
 	)
 }
