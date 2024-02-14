@@ -99,16 +99,21 @@ async function mode_restore() {
 	for await (const f of glob.scan(backup_dir)) {
 		const backup_file = Bun.file(`${backup_dir}/${f}`)
 		const destination_file = Bun.file(`${search_dir}/${f}`)
+		// skip if destination file does not exist
+		if (!(await destination_file.exists())) {
+			continue
+		}
+		const destination_size = destination_file.size
+		await Bun.write(`${search_dir}/${f}`, backup_file)
 		if (!QUIET) {
 			console.log(
 				`${destination_file.name} \x1b[32m${get_kilobytes(
-					destination_file.size
+					destination_size
 				)}kB \u2192 ${get_kilobytes(backup_file.size)}kB (${Math.trunc(
-					(backup_file.size / destination_file.size) * 100
+					(backup_file.size / destination_size) * 100
 				)}%) \x1b[0m`
 			)
 		}
-		await Bun.write(destination_file, backup_file)
 		total_files++
 	}
 
