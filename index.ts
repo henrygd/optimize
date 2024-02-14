@@ -4,10 +4,13 @@ import { mkdir, stat } from 'node:fs/promises'
 import { optimize_image } from './optimize'
 import { get_kilobytes, get_megabytes } from './util'
 
-const MODE = (process.env.MODE || 'overwrite') as 'overwrite' | 'copy' | 'restore'
-const EXTENSIONS =
-	process.env.EXTENSIONS || 'jpg,JPG,jpeg,JPEG,png,PNG,gif,GIF,webp,WEBP,tif,TIF,tiff,TIFF'
 const { MIN_SIZE, MAX_AGE, OWNER, QUIET } = process.env
+
+const MODE = (process.env.MODE || 'overwrite') as 'overwrite' | 'copy' | 'restore'
+let EXTENSIONS = process.env.EXTENSIONS || 'jpg,jpeg,png,gif,webp,tif,tiff'
+
+// add upper case extensions
+EXTENSIONS += `,${EXTENSIONS.toUpperCase()}`
 
 const search_dir = './images'
 const glob = new Glob(`**/*.{${EXTENSIONS}}`)
