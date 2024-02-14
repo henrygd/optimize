@@ -14,22 +14,27 @@ interface OptimizeOptions {
 	log?: boolean
 }
 
-const get_format = (input_file: string): keyof FormatEnum => {
-	if (process.env.MODE === 'copy' && FORMAT) {
-		return FORMAT as keyof FormatEnum
-	}
-	return input_file.split('.').at(-1)?.toLowerCase() as keyof FormatEnum
-}
-
-/** Optimize an image with the given options. */
+/**
+ * Optimizes an image based on the provided options.
+ *
+ * @param {OptimizeOptions} input_file - The input file to optimize.
+ * @param {OptimizeOptions} output_file - The file to write the optimized image to.
+ * @param {OptimizeOptions} log - Flag to indicate whether to log the size difference of the files. Default is true.
+ * @return {Promise<number>} The size difference between the input and output files after optimization.
+ */
 export async function optimize_image({
 	input_file,
 	output_file,
 	log = true,
 }: OptimizeOptions): Promise<number> {
 	try {
-		const format = get_format(input_file)
-		output_file = `${output_file.replace(/\.[^.]+$/, `.${format}`)}`
+		let format: string
+		if (get_mode() === 'copy' && FORMAT) {
+			format = FORMAT
+			output_file = `${output_file.replace(/\.[^.]+$/, `.${format}`)}`
+		} else {
+			format = input_file.split('.').at(-1) as string
+		}
 		await sharp(input_file)
 			.resize({
 				fit: FIT,
@@ -37,7 +42,7 @@ export async function optimize_image({
 				height: MAX_HEIGHT,
 				withoutEnlargement: true,
 			})
-			.toFormat(format, {
+			.toFormat(format as keyof FormatEnum, {
 				quality: QUALITY,
 			})
 			.toFile(output_file)
