@@ -1,6 +1,6 @@
 import { BunFile, Glob } from 'bun'
 import { existsSync } from 'node:fs'
-import { mkdir, stat } from 'node:fs/promises'
+import { mkdir, stat, unlink } from 'node:fs/promises'
 import { optimize_image } from './optimize'
 import { get_kilobytes, get_megabytes, get_mode } from './util'
 
@@ -69,20 +69,28 @@ async function mode_overwrite() {
 	for await (const f of glob.scan(search_dir)) {
 		const full_path = `${search_dir}/${f}`
 		const original_file = Bun.file(full_path)
-
+		// check if file meets criteria to optimize
 		const is_valid = await file_meets_criteria({ path: full_path, file: original_file })
 		if (!is_valid) {
 			continue
 		}
-
+		// copy original to backup
 		const backup_file = `${backup_dir}/${f}`
-		// copy file to backup
-		await Bun.write(Bun.file(backup_file), original_file)
+		await Bun.write(backup_file, original_file)
+		// optimize image
 		const bytes_saved = await optimize_image({
 			input_file: backup_file,
 			output_file: full_path,
 			log: !QUIET,
 		})
+		// revert if negative bytes saved
+		if (bytes_saved < 0) {
+			console.log(`\x1b[33mreverting ${full_path}\x1b[0m`)
+			await Bun.write(full_path, Bun.file(backup_file))
+			await unlink(backup_file)
+			continue
+		}
+		// update total bytes and total files
 		total_bytes_saved += bytes_saved
 		bytes_saved && total_files++
 	}
