@@ -7,10 +7,7 @@ import { get_kilobytes, get_megabytes } from './util'
 const MODE = (process.env.MODE || 'overwrite') as 'overwrite' | 'copy' | 'restore'
 const EXTENSIONS =
 	process.env.EXTENSIONS || 'jpg,JPG,jpeg,JPEG,png,PNG,gif,GIF,webp,WEBP,tif,TIF,tiff,TIFF'
-const MIN_SIZE = Number(process.env.MIN_SIZE || 800)
-const MAX_AGE = process.env.MAX_AGE
-const OWNER = process.env.OWNER
-const QUIET = process.env.QUIET
+const { MIN_SIZE, MAX_AGE, OWNER, QUIET } = process.env
 
 const search_dir = './images'
 const glob = new Glob(`**/*.{${EXTENSIONS}}`)
@@ -31,19 +28,16 @@ function check_that_dir_exists(dir: string) {
 /** Check if a file meets the specified criteria to optimize */
 async function file_meets_criteria(opts: { path: string; file: BunFile }) {
 	// false if size is less than MIN_SIZE
-	if (opts.file.size < MIN_SIZE * 1024) {
+	if (MIN_SIZE && opts.file.size < Number(MIN_SIZE) * 1024) {
 		return false
 	}
-
 	// false if creation time is more than MAX_AGE
 	if (MAX_AGE) {
 		const { ctimeMs } = await stat(opts.path)
-		// skip if creation is more than IMG_AGE
 		if (performance.timeOrigin - ctimeMs > Number(MAX_AGE) * 60 * 60 * 1000) {
 			return false
 		}
 	}
-
 	return true
 }
 
