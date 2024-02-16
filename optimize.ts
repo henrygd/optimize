@@ -12,6 +12,7 @@ interface OptimizeOptions {
 	input_file: string
 	output_file: string
 	log?: boolean
+	on_error?: (err: Error) => void
 }
 
 /**
@@ -26,6 +27,7 @@ export async function optimize_image({
 	input_file,
 	output_file,
 	log = true,
+	on_error,
 }: OptimizeOptions): Promise<number> {
 	try {
 		let format: string
@@ -59,7 +61,11 @@ export async function optimize_image({
 		}
 		return bf_input_file.size - bf_output_file.size
 	} catch (error) {
-		console.log(error)
+		console.error(input_file)
+		if (error?.message) {
+			console.error(` \u21B3 ${error?.message}`)
+		}
+		on_error?.(error)
 		return 0
 	}
 }

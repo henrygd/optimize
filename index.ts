@@ -82,10 +82,11 @@ async function mode_overwrite() {
 			input_file: backup_file,
 			output_file: full_path,
 			log: !QUIET,
+			on_error: () => unlink(backup_file),
 		})
 		// revert if negative bytes saved
 		if (bytes_saved < 0) {
-			console.log(`\x1b[33mreverting ${full_path}\x1b[0m`)
+			QUIET || console.warn(`\x1b[33m \u21B3 reverting ${full_path}\x1b[0m`)
 			await Bun.write(full_path, Bun.file(backup_file))
 			await unlink(backup_file)
 			continue
