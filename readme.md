@@ -39,7 +39,7 @@ docker run --rm -v ./images:/images -v ./optimized:/optimized -e MODE=copy -e FO
 | MAX_HEIGHT | \*   | Max height of output image          | 2800                           |
 | FIT        | \*   | [Fit method](#fit-methods)          | inside                         |
 | OWNER      | \*   | Ownership of new files[^owner]      | root:root                      |
-| QUIET      | \*   | Will not log every file             | unset                          |
+| QUIET      | \*   | Log only errors, not every file     | unset                          |
 | FORMAT     | copy | Output format[^format]              | unset                          |
 
 ## Fit Methods
