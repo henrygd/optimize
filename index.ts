@@ -116,7 +116,7 @@ async function mode_restore() {
 		await Bun.write(`${search_dir}/${f}`, backup_file)
 		if (!QUIET) {
 			console.log(
-				`${destination_file.name} \x1b[32m${get_kilobytes(
+				`${destination_file.name?.slice(9)} \x1b[32m${get_kilobytes(
 					destination_size
 				)}kB \u2192 ${get_kilobytes(backup_file.size)}kB (${Math.trunc(
 					(backup_file.size / destination_size) * 100

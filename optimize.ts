@@ -54,9 +54,11 @@ export async function optimize_image({
 		if (log) {
 			const log_file = get_mode() === 'overwrite' ? bf_output_file : bf_input_file
 			console.log(
-				`${log_file.name} \x1b[32m${get_kilobytes(bf_input_file.size)}kB \u2192 ${get_kilobytes(
-					bf_output_file.size
-				)}kB (${Math.trunc((bf_output_file.size / bf_input_file.size) * 100)}%) \x1b[0m`
+				`${log_file.name?.slice(9)} \x1b[32m${get_kilobytes(
+					bf_input_file.size
+				)}kB \u2192 ${get_kilobytes(bf_output_file.size)}kB (${Math.trunc(
+					(bf_output_file.size / bf_input_file.size) * 100
+				)}%) \x1b[0m`
 			)
 		}
 		return bf_input_file.size - bf_output_file.size
