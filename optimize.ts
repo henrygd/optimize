@@ -37,6 +37,24 @@ export async function optimize_image({
 		} else {
 			format = input_file.split('.').at(-1) as string
 		}
+
+		// default output options
+		let output_options = {
+			quality: QUALITY,
+		} as sharp.OutputOptions | sharp.JpegOptions
+
+		const lowercase_format = format.toLowerCase()
+		// set options specific to jpeg
+		if (lowercase_format === 'jpeg' || lowercase_format === 'jpg') {
+			output_options = {
+				...output_options,
+				progressive: true,
+				trellisQuantisation: true,
+				quantizationTable: 3,
+				overshootDeringing: true,
+			}
+		}
+
 		await sharp(input_file)
 			.resize({
 				fit: FIT,
@@ -44,9 +62,7 @@ export async function optimize_image({
 				height: MAX_HEIGHT,
 				withoutEnlargement: true,
 			})
-			.toFormat(format as keyof FormatEnum, {
-				quality: QUALITY,
-			})
+			.toFormat(format as keyof FormatEnum, output_options)
 			.toFile(output_file)
 		// log the size difference of the files
 		const bf_input_file = Bun.file(input_file)
