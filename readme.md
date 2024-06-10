@@ -30,17 +30,18 @@ docker run --rm -v ./images:/images -v ./optimized:/optimized -e MODE=copy -e FO
 
 | Name       | Mode | Description                         | Default                        |
 | ---------- | ---- | ----------------------------------- | ------------------------------ |
-| MODE       | \*   | [Mode](#modes)                      | overwrite                      |
-| QUALITY    | \*   | Output quality                      | 80                             |
 | EXTENSIONS | \*   | Extensions to optimize[^extensions] | jpg,jpeg,png,gif,webp,tif,tiff |
-| MIN_SIZE   | \*   | Size threshold in kilobytes[^size]  | unset                          |
-| MAX_AGE    | \*   | Age threshold in hours[^age]        | unset                          |
-| MAX_WIDTH  | \*   | Max width of output image           | 2800                           |
-| MAX_HEIGHT | \*   | Max height of output image          | 2800                           |
 | FIT        | \*   | [Fit method](#fit-methods)          | inside                         |
-| OWNER      | \*   | Ownership of new files[^owner]      | root:root                      |
-| QUIET      | \*   | Log only errors, not every file     | unset                          |
 | FORMAT     | copy | Output format[^format]              | unset                          |
+| JOBS       | \*   | Number of parallel conversion jobs  | 1                              |
+| MAX_AGE    | \*   | Age threshold in hours[^age]        | unset                          |
+| MAX_HEIGHT | \*   | Max height of output image          | 2800                           |
+| MAX_WIDTH  | \*   | Max width of output image           | 2800                           |
+| MIN_SIZE   | \*   | Size threshold in kilobytes[^size]  | unset                          |
+| MODE       | \*   | [Mode](#modes)                      | overwrite                      |
+| OWNER      | \*   | Ownership of new files[^owner]      | root:root                      |
+| QUALITY    | \*   | Output quality                      | 80                             |
+| QUIET      | \*   | Log only errors, not every file     | unset                          |
 
 ## Fit Methods
 

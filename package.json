@@ -1,8 +1,9 @@
 {
-	"dependencies": {
-		"sharp": "^0.33.2"
-	},
-	"devDependencies": {
-		"@types/bun": "^1.0.5"
-	}
+  "dependencies": {
+    "@henrygd/queue": "^0.0.2",
+    "sharp": "^0.33.4"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.1.3"
+  }
 }

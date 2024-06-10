@@ -3,8 +3,9 @@ import { existsSync } from 'node:fs'
 import { mkdir, stat, unlink } from 'node:fs/promises'
 import { optimize_image } from './optimize'
 import { get_kilobytes, get_megabytes, get_mode, pluralize } from './util'
+import { newQueue } from '@henrygd/queue'
 
-const { MIN_SIZE, MAX_AGE, OWNER, QUIET } = process.env
+const { MIN_SIZE, MAX_AGE, OWNER, QUIET, JOBS } = process.env
 const MODE = get_mode()
 let EXTENSIONS = process.env.EXTENSIONS || 'jpg,jpeg,png,gif,webp,tif,tiff'
 
@@ -50,6 +51,12 @@ let total_files = 0
 let total_bytes_saved = 0
 let directories_to_chown: string[] = []
 
+const numJobs = JOBS ? Number(JOBS) : 1
+if (Number.isNaN(numJobs) || numJobs < 1 || numJobs > 20) {
+	console.error('JOBS must be a number between 1 and 20')
+	process.exit(1)
+}
+
 switch (MODE) {
 	case 'overwrite':
 		await mode_overwrite()
@@ -66,13 +73,16 @@ switch (MODE) {
 async function mode_overwrite() {
 	const backup_dir = './backup'
 
-	for await (const f of glob.scan(search_dir)) {
+	const queue = newQueue(numJobs)
+	const jobs: Promise<void>[] = []
+
+	async function runJob(f: string) {
 		const full_path = `${search_dir}/${f}`
 		const original_file = Bun.file(full_path)
 		// check if file meets criteria to optimize
 		const is_valid = await file_meets_criteria({ path: full_path, file: original_file })
 		if (!is_valid) {
-			continue
+			return
 		}
 		// copy original to backup
 		const backup_file = `${backup_dir}/${f}`
@@ -89,12 +99,17 @@ async function mode_overwrite() {
 			QUIET || console.warn(`\x1b[33m \u21B3 reverting ${full_path}\x1b[0m`)
 			await Bun.write(full_path, Bun.file(backup_file))
 			await unlink(backup_file)
-			continue
+			return
 		}
 		// update total bytes and total files
 		total_bytes_saved += bytes_saved
 		bytes_saved && total_files++
 	}
+
+	for await (const f of glob.scan(search_dir)) {
+		jobs.push(queue.add(() => runJob(f)))
+	}
+	await Promise.all(jobs)
 
 	// chown backup directory
 	directories_to_chown.push(backup_dir)
@@ -133,13 +148,16 @@ async function mode_copy() {
 	const output_dir = './optimized'
 	check_that_dir_exists(output_dir)
 
-	for await (const f of glob.scan(search_dir)) {
+	const queue = newQueue(numJobs)
+	const jobs: Promise<void>[] = []
+
+	async function runJob(f: string) {
 		const full_path = `${search_dir}/${f}`
 		const original_file = Bun.file(full_path)
 
 		const is_valid = await file_meets_criteria({ path: full_path, file: original_file })
 		if (!is_valid) {
-			continue
+			return
 		}
 
 		// create output directory if necessary
@@ -160,6 +178,11 @@ async function mode_copy() {
 		total_bytes_saved += bytes_saved
 		bytes_saved && total_files++
 	}
+
+	for await (const f of glob.scan(search_dir)) {
+		jobs.push(queue.add(() => runJob(f)))
+	}
+	await Promise.all(jobs)
 
 	// chown the output directory to the correct user
 	directories_to_chown.push(output_dir)
