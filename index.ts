@@ -7,7 +7,7 @@ import { newQueue } from '@henrygd/queue'
 
 const { MIN_SIZE, MAX_AGE, OWNER, QUIET, JOBS } = process.env
 const MODE = get_mode()
-let EXTENSIONS = process.env.EXTENSIONS || 'jpg,jpeg,png,gif,webp,tif,tiff'
+let EXTENSIONS = process.env.EXTENSIONS || 'jpg,jpeg,png,webp,tif,tiff'
 
 // add upper case extensions
 EXTENSIONS += `,${EXTENSIONS.toUpperCase()}`
