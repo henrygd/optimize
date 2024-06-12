@@ -35,8 +35,8 @@ docker run --rm -v ./images:/images -v ./optimized:/optimized -e MODE=copy -e FO
 | FORMAT     | copy | Output format[^format]              | unset                      |
 | JOBS       | \*   | Number of parallel conversion jobs  | 1                          |
 | MAX_AGE    | \*   | Age threshold in hours[^age]        | unset                      |
-| MAX_HEIGHT | \*   | Max height of output image          | 2800                       |
-| MAX_WIDTH  | \*   | Max width of output image           | 2800                       |
+| MAX_HEIGHT | \*   | Max height of output image          | 4000                       |
+| MAX_WIDTH  | \*   | Max width of output image           | 4000                       |
 | MIN_SIZE   | \*   | Size threshold in kilobytes[^size]  | unset                      |
 | MODE       | \*   | [Mode](#modes)                      | overwrite                  |
 | OWNER      | \*   | Ownership of new files[^owner]      | root:root                  |

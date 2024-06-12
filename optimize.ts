@@ -3,8 +3,8 @@ import { get_kilobytes, get_mode } from './util'
 
 // set options for sharp
 const QUALITY = Number(process.env.QUALITY || 80)
-const MAX_WIDTH = Number(process.env.MAX_WIDTH || 2800)
-const MAX_HEIGHT = Number(process.env.MAX_HEIGHT || 2800)
+const MAX_WIDTH = Number(process.env.MAX_WIDTH || 4000)
+const MAX_HEIGHT = Number(process.env.MAX_HEIGHT || 4000)
 const FIT = (process.env.FIT || 'inside') as keyof FitEnum
 const FORMAT = process.env.FORMAT
 
