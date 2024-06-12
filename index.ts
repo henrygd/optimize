@@ -4,6 +4,7 @@ import { mkdir, stat, unlink } from 'node:fs/promises'
 import { optimize_image } from './optimize'
 import { get_kilobytes, get_megabytes, get_mode, pluralize } from './util'
 import { newQueue } from '@henrygd/queue'
+import { availableParallelism } from 'os'
 
 const { MIN_SIZE, MAX_AGE, OWNER, QUIET, JOBS } = process.env
 const MODE = get_mode()
@@ -44,6 +45,14 @@ async function file_meets_criteria(opts: { path: string; file: BunFile }) {
 	return true
 }
 
+function calculate_optimal_jobs(): number {
+	const available = availableParallelism()
+	let jobs = Math.trunc((available - 1) / 2)
+	jobs = Math.min(32, Math.max(1, jobs))
+	// console.log(`Available cores: ${available}. Using ${jobs} job(s).`)
+	return jobs
+}
+
 // check that /images directory is mounted
 check_that_dir_exists(search_dir)
 
@@ -51,18 +60,21 @@ let total_files = 0
 let total_bytes_saved = 0
 let directories_to_chown: string[] = []
 
-// set up queue
-const numJobs = JOBS ? Number(JOBS) : 1
-if (Number.isNaN(numJobs) || numJobs < 1 || numJobs > 20) {
-	console.error('JOBS must be a number between 1 and 20')
-	process.exit(1)
+/** Create a queue to run jobs in parallel */
+function getQueue() {
+	const numJobs = JOBS ? Number(JOBS) : calculate_optimal_jobs()
+	if (Number.isNaN(numJobs) || numJobs < 1 || numJobs > 32) {
+		console.error('JOBS must be a number between 1 and 32')
+		process.exit(1)
+	}
+	const queue = newQueue(numJobs)
+	// clear queue on SIGINT
+	process.on('SIGINT', async () => {
+		console.warn('\nSIGINT received. Finishing current conversion(s) and exiting...\n')
+		queue.clear()
+	})
+	return queue
 }
-const queue = newQueue(numJobs)
-// clear queue on SIGINT
-process.on('SIGINT', async () => {
-	console.warn('SIGINT received. Finishing current conversion(s) and exiting...')
-	queue.clear()
-})
 
 switch (MODE) {
 	case 'overwrite':
@@ -109,6 +121,8 @@ async function mode_overwrite() {
 		total_bytes_saved += bytes_saved
 		bytes_saved && total_files++
 	}
+
+	const queue = getQueue()
 
 	for await (const f of glob.scan(search_dir)) {
 		queue.add(() => runJob(f))
@@ -180,6 +194,8 @@ async function mode_copy() {
 		total_bytes_saved += bytes_saved
 		bytes_saved && total_files++
 	}
+
+	const queue = getQueue()
 
 	for await (const f of glob.scan(search_dir)) {
 		queue.add(() => runJob(f))
