@@ -8,6 +8,8 @@ const MAX_HEIGHT = Number(process.env.MAX_HEIGHT || 2800)
 const FIT = (process.env.FIT || 'inside') as keyof FitEnum
 const FORMAT = process.env.FORMAT
 
+const tick = () => new Promise((resolve) => setTimeout(resolve, 0))
+
 interface OptimizeOptions {
 	input_file: string
 	output_file: string
@@ -77,7 +79,13 @@ export async function optimize_image({
 				)}%) \x1b[0m`
 			)
 		}
-		return bf_input_file.size - bf_output_file.size
+		const bytes_saved = bf_input_file.size - bf_output_file.size
+		if (bytes_saved < 0) {
+			// fix to ensure the 'reverting' message displays below the log above
+			// strange one since we're using await in outer function (index.ts)
+			await tick()
+		}
+		return bytes_saved
 	} catch (error) {
 		console.error(input_file)
 		if (error?.message) {
