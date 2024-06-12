@@ -28,20 +28,20 @@ docker run --rm -v ./images:/images -v ./optimized:/optimized -e MODE=copy -e FO
 
 ## Environment Variables
 
-| Name       | Mode | Description                         | Default                    |
-| ---------- | ---- | ----------------------------------- | -------------------------- |
-| EXTENSIONS | \*   | Extensions to optimize[^extensions] | jpg,jpeg,png,webp,tif,tiff |
-| FIT        | \*   | [Fit method](#fit-methods)          | inside                     |
-| FORMAT     | copy | Output format[^format]              | unset                      |
-| JOBS       | \*   | Number of parallel conversion jobs  | 1                          |
-| MAX_AGE    | \*   | Age threshold in hours[^age]        | unset                      |
-| MAX_HEIGHT | \*   | Max height of output image          | 4000                       |
-| MAX_WIDTH  | \*   | Max width of output image           | 4000                       |
-| MIN_SIZE   | \*   | Size threshold in kilobytes[^size]  | unset                      |
-| MODE       | \*   | [Mode](#modes)                      | overwrite                  |
-| OWNER      | \*   | Ownership of new files[^owner]      | root:root                  |
-| QUALITY    | \*   | Output quality                      | 80                         |
-| QUIET      | \*   | Log only errors, not every file     | unset                      |
+| Name       | Mode | Description                         | Default                             |
+| ---------- | ---- | ----------------------------------- | ----------------------------------- |
+| EXTENSIONS | \*   | Extensions to optimize[^extensions] | jpg,jpeg,png,webp,tif,tiff          |
+| FIT        | \*   | [Fit method](#fit-methods)          | inside                              |
+| FORMAT     | copy | Output format[^format]              | unset                               |
+| JOBS       | \*   | Number of parallel conversion jobs  | Based on available CPU cores[^jobs] |
+| MAX_AGE    | \*   | Age threshold in hours[^age]        | unset                               |
+| MAX_HEIGHT | \*   | Max height of output image          | 4000                                |
+| MAX_WIDTH  | \*   | Max width of output image           | 4000                                |
+| MIN_SIZE   | \*   | Size threshold in kilobytes[^size]  | unset                               |
+| MODE       | \*   | [Mode](#modes)                      | overwrite                           |
+| OWNER      | \*   | Ownership of new files[^owner]      | root:root                           |
+| QUALITY    | \*   | Output quality                      | 80                                  |
+| QUIET      | \*   | Log only errors, not every file     | unset                               |
 
 ## Fit Methods
 
@@ -56,3 +56,4 @@ docker run --rm -v ./images:/images -v ./optimized:/optimized -e MODE=copy -e FO
 [^age]: Images are only optimized if they were created in the last `MAX_AGE` hours. For example, `24` would only optimize images created in the last 24 hours.
 [^owner]: This applies only to newly created files. Overwritten files should maintain existing permissions. Value should use IDs. For example: `-e OWNER=1000:1000`, or `-e OWNER="$(id -u):$(id -g)"`.
 [^format]: This will force all optimized images to be converted to the specified format. Possible values: `webp`, `avif`.
+[^jobs]: Default `JOBS` value is one fewer than half of your available cores. If you have 16 cores, it's 7 jobs. If you have 4 cores or fewer, it's only one job.
