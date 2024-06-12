@@ -51,11 +51,13 @@ let total_files = 0
 let total_bytes_saved = 0
 let directories_to_chown: string[] = []
 
+// set up queue
 const numJobs = JOBS ? Number(JOBS) : 1
 if (Number.isNaN(numJobs) || numJobs < 1 || numJobs > 20) {
 	console.error('JOBS must be a number between 1 and 20')
 	process.exit(1)
 }
+const queue = newQueue(numJobs)
 
 switch (MODE) {
 	case 'overwrite':
@@ -72,9 +74,6 @@ switch (MODE) {
 /** Overwrite existing images (default) */
 async function mode_overwrite() {
 	const backup_dir = './backup'
-
-	const queue = newQueue(numJobs)
-	const jobs: Promise<void>[] = []
 
 	async function runJob(f: string) {
 		const full_path = `${search_dir}/${f}`
@@ -107,9 +106,10 @@ async function mode_overwrite() {
 	}
 
 	for await (const f of glob.scan(search_dir)) {
-		jobs.push(queue.add(() => runJob(f)))
+		queue.add(() => runJob(f))
 	}
-	await Promise.all(jobs)
+
+	await queue.done()
 
 	// chown backup directory
 	directories_to_chown.push(backup_dir)
@@ -148,9 +148,6 @@ async function mode_copy() {
 	const output_dir = './optimized'
 	check_that_dir_exists(output_dir)
 
-	const queue = newQueue(numJobs)
-	const jobs: Promise<void>[] = []
-
 	async function runJob(f: string) {
 		const full_path = `${search_dir}/${f}`
 		const original_file = Bun.file(full_path)
@@ -180,9 +177,10 @@ async function mode_copy() {
 	}
 
 	for await (const f of glob.scan(search_dir)) {
-		jobs.push(queue.add(() => runJob(f)))
+		queue.add(() => runJob(f))
 	}
-	await Promise.all(jobs)
+
+	await queue.done()
 
 	// chown the output directory to the correct user
 	directories_to_chown.push(output_dir)
