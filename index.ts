@@ -58,6 +58,11 @@ if (Number.isNaN(numJobs) || numJobs < 1 || numJobs > 20) {
 	process.exit(1)
 }
 const queue = newQueue(numJobs)
+// clear queue on SIGINT
+process.on('SIGINT', async () => {
+	console.warn('SIGINT received. Finishing current conversion(s) and exiting...')
+	queue.clear()
+})
 
 switch (MODE) {
 	case 'overwrite':
