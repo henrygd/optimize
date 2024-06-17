@@ -19,14 +19,9 @@ const glob = new Glob(`**/*.{${EXTENSIONS}}`)
 const { maxAgeMs, minSizeKB, currentTime } = formatEnvVars()
 
 // exit if required directory is not found
-function check_that_dir_exists(dir: string) {
+function check_that_dir_exists(dir: string, name: string) {
 	if (!existsSync(dir)) {
-		console.log(
-			`\x1b[31m${dir.replace(
-				'.',
-				''
-			)} directory not found. Please make sure you have mounted it.\x1b[0m`
-		)
+		console.log(`\x1b[31m${name} directory not found. Make sure you have mounted it.\x1b[0m`)
 		process.exit(1)
 	}
 }
@@ -35,16 +30,16 @@ function check_that_dir_exists(dir: string) {
 async function file_meets_criteria(opts: { path: string; file: BunFile }) {
 	// false if size is less than MIN_SIZE
 	if (minSizeKB && opts.file.size < minSizeKB) {
-		return false
+		return { valid: false, mtime: 0 }
 	}
 	// abort if file content was modified more than MAX_AGE hours ago
+	const { mtimeMs, mtime } = await stat(opts.path)
 	if (maxAgeMs) {
-		const { mtimeMs } = await stat(opts.path)
 		if (currentTime - mtimeMs > maxAgeMs) {
-			return false
+			return { valid: false, mtime: 0 }
 		}
 	}
-	return true
+	return { valid: true, mtime }
 }
 
 function calculate_optimal_jobs(): number {
@@ -56,7 +51,7 @@ function calculate_optimal_jobs(): number {
 }
 
 // check that /images directory is mounted
-check_that_dir_exists(search_dir)
+check_that_dir_exists(search_dir, 'images directory')
 
 let total_files = 0
 let total_bytes_saved = 0
@@ -98,8 +93,11 @@ async function mode_overwrite() {
 		const full_path = `${search_dir}/${f}`
 		const original_file = Bun.file(full_path)
 		// check if file meets criteria to optimize
-		const is_valid = await file_meets_criteria({ path: full_path, file: original_file })
-		if (!is_valid) {
+		const { valid, mtime } = await file_meets_criteria({
+			path: full_path,
+			file: original_file,
+		})
+		if (!valid) {
 			return
 		}
 		// copy original to backup
@@ -116,9 +114,12 @@ async function mode_overwrite() {
 		if (bytes_saved < 0) {
 			QUIET || console.warn(`\x1b[33m \u21B3 reverting ${full_path}\x1b[0m`)
 			await Bun.write(full_path, Bun.file(backup_file))
+			await utimes(full_path, mtime, mtime)
 			await unlink(backup_file)
 			return
 		}
+		// maintain original mtime
+		await utimes(full_path, mtime, mtime)
 		// update total bytes and total files
 		total_bytes_saved += bytes_saved
 		bytes_saved && total_files++
@@ -139,7 +140,7 @@ async function mode_overwrite() {
 /** Restore original images from backup directory */
 async function mode_restore() {
 	const backup_dir = './backup'
-	check_that_dir_exists(backup_dir)
+	check_that_dir_exists(backup_dir, 'backup directory')
 
 	for await (const f of glob.scan(backup_dir)) {
 		const backup_file = Bun.file(`${backup_dir}/${f}`)
@@ -167,14 +168,14 @@ async function mode_restore() {
 
 async function mode_copy() {
 	const output_dir = './optimized'
-	check_that_dir_exists(output_dir)
+	check_that_dir_exists(output_dir, 'optimized directory')
 
 	async function runJob(f: string) {
 		const full_path = `${search_dir}/${f}`
 		const original_file = Bun.file(full_path)
 
-		const is_valid = await file_meets_criteria({ path: full_path, file: original_file })
-		if (!is_valid) {
+		const { valid } = await file_meets_criteria({ path: full_path, file: original_file })
+		if (!valid) {
 			return
 		}
 

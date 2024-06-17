@@ -1,5 +1,6 @@
 import sharp, { FitEnum, FormatEnum } from 'sharp'
 import { get_kilobytes, get_mode } from './util'
+import { setTimeout } from 'timers/promises'
 
 // set options for sharp
 const QUALITY = Number(process.env.QUALITY || 80)
@@ -7,8 +8,6 @@ const MAX_WIDTH = Number(process.env.MAX_WIDTH || 4000)
 const MAX_HEIGHT = Number(process.env.MAX_HEIGHT || 4000)
 const FIT = (process.env.FIT || 'inside') as keyof FitEnum
 const FORMAT = process.env.FORMAT
-
-const tick = () => new Promise((resolve) => setTimeout(resolve, 0))
 
 interface OptimizeOptions {
 	input_file: string
@@ -82,8 +81,8 @@ export async function optimize_image({
 		const bytes_saved = bf_input_file.size - bf_output_file.size
 		if (bytes_saved < 0) {
 			// fix to ensure the 'reverting' message displays below the log above
-			// strange one since we're using await in outer function (index.ts)
-			await tick()
+			// strange since we're using await in outer function (index.ts)
+			await setTimeout(0)
 		}
 		return bytes_saved
 	} catch (error) {
