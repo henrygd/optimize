@@ -1,10 +1,10 @@
-Set Shell zsh
-Set TypingSpeed 20ms
-Set Theme "Dracula"
-Set Padding 34
-Set Height 260
+Set TypingSpeed 25ms
+Set Theme { "name": "Custom", "brightGreen": "#3bff83", "background": "#282c34", "cursor": "#eeeeee"}
+Set Padding 40
+Set Width 1160
+Set Height 400
 Set Framerate 30
-Type "docker run --rm -v ./images:/images -v ./backup:/backup henrygd/optimize"
-Sleep 1s
+Type "docker run --rm -v ./images:/images henrygd/optimize"
+Sleep 400ms
 Enter
-Sleep 5s
+Sleep 6s

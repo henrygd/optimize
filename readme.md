@@ -53,7 +53,7 @@ docker run --rm -v ./images:/images -v ./optimized:/optimized -e MODE=copy -e FO
 
 [^extensions]: Uppercase versions of extensions are added automatically.
 [^size]: Images are only optimized if they are larger than `MIN_SIZE`. For example, `800` would only optimize images larger than 800kB.
-[^age]: Images are only optimized if they were created in the last `MAX_AGE` hours. For example, `24` would only optimize images created in the last 24 hours.
+[^age]: Images are only optimized if its file content was modififed in the last `MAX_AGE` hours. For example, `24` would only optimize images updated in the last 24 hours.
 [^owner]: This applies only to newly created files. Overwritten files should maintain existing permissions. Value should use IDs. For example: `-e OWNER=1000:1000`, or `-e OWNER="$(id -u):$(id -g)"`.
 [^format]: This will force all optimized images to be converted to the specified format. Possible values: `webp`, `avif`.
 [^jobs]: Default `JOBS` value is one fewer than half of your available cores. If you have 16 cores, it's 7 jobs. If you have 4 cores or fewer, it's only one job.
