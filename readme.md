@@ -1,6 +1,6 @@
 Dockerized script to bulk optimize images using [libvips](https://github.com/libvips/libvips) / [sharp](https://github.com/lovell/sharp) / [bun](https://bun.sh).
 
-![example terminal command output: Total: 5.36MB saved from 4 images](assets/example.gif)
+![example terminal command output: Total: 5.36MB saved from 4 images](assets/example.gif?v=2)
 
 ## Modes
 
