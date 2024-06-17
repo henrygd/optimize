@@ -1,12 +1,12 @@
 import { BunFile, Glob } from 'bun'
 import { existsSync } from 'node:fs'
-import { mkdir, stat, unlink } from 'node:fs/promises'
+import { mkdir, stat, unlink, utimes } from 'node:fs/promises'
 import { optimize_image } from './optimize'
-import { get_kilobytes, get_megabytes, get_mode, pluralize } from './util'
+import { formatEnvVars, get_kilobytes, get_megabytes, get_mode, pluralize } from './util'
 import { newQueue } from '@henrygd/queue'
 import { availableParallelism } from 'os'
 
-const { MIN_SIZE, MAX_AGE, OWNER, QUIET, JOBS } = process.env
+const { OWNER, QUIET, JOBS } = process.env
 const MODE = get_mode()
 let EXTENSIONS = process.env.EXTENSIONS || 'jpg,jpeg,png,webp,tif,tiff'
 
@@ -15,6 +15,8 @@ EXTENSIONS += `,${EXTENSIONS.toUpperCase()}`
 
 const search_dir = './images'
 const glob = new Glob(`**/*.{${EXTENSIONS}}`)
+
+const { maxAgeMs, minSizeKB, currentTime } = formatEnvVars()
 
 // exit if required directory is not found
 function check_that_dir_exists(dir: string) {
@@ -32,13 +34,13 @@ function check_that_dir_exists(dir: string) {
 /** Check if a file meets the specified criteria to optimize */
 async function file_meets_criteria(opts: { path: string; file: BunFile }) {
 	// false if size is less than MIN_SIZE
-	if (MIN_SIZE && opts.file.size < Number(MIN_SIZE) * 1024) {
+	if (minSizeKB && opts.file.size < minSizeKB) {
 		return false
 	}
-	// false if creation time is more than MAX_AGE
-	if (MAX_AGE) {
-		const { ctimeMs } = await stat(opts.path)
-		if (performance.timeOrigin - ctimeMs > Number(MAX_AGE) * 60 * 60 * 1000) {
+	// abort if file content was modified more than MAX_AGE hours ago
+	if (maxAgeMs) {
+		const { mtimeMs } = await stat(opts.path)
+		if (currentTime - mtimeMs > maxAgeMs) {
 			return false
 		}
 	}
