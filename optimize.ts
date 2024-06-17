@@ -1,6 +1,5 @@
 import sharp, { FitEnum, FormatEnum } from 'sharp'
 import { get_kilobytes, get_mode } from './util'
-import { setTimeout } from 'timers/promises'
 
 // set options for sharp
 const QUALITY = Number(process.env.QUALITY || 80)
@@ -71,7 +70,7 @@ export async function optimize_image({
 		if (log) {
 			const log_file = get_mode() === 'overwrite' ? bf_output_file : bf_input_file
 			console.log(
-				`${log_file.name?.slice(9)} \x1b[32m${get_kilobytes(
+				`${log_file.name?.slice(9)} \x1b[92m${get_kilobytes(
 					bf_input_file.size
 				)}kB \u2192 ${get_kilobytes(bf_output_file.size)}kB (${Math.trunc(
 					(bf_output_file.size / bf_input_file.size) * 100
@@ -82,7 +81,7 @@ export async function optimize_image({
 		if (bytes_saved < 0) {
 			// fix to ensure the 'reverting' message displays below the log above
 			// strange since we're using await in outer function (index.ts)
-			await setTimeout(0)
+			await new Promise((resolve) => setTimeout(resolve, 0))
 		}
 		return bytes_saved
 	} catch (error) {

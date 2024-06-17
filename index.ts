@@ -153,7 +153,7 @@ async function mode_restore() {
 		await Bun.write(`${search_dir}/${f}`, backup_file)
 		if (!QUIET) {
 			console.log(
-				`${destination_file.name?.slice(9)} \x1b[32m${get_kilobytes(
+				`${destination_file.name?.slice(9)} \x1b[92m${get_kilobytes(
 					destination_size
 				)}kB \u2192 ${get_kilobytes(backup_file.size)}kB (${Math.trunc(
 					(backup_file.size / destination_size) * 100
@@ -163,7 +163,7 @@ async function mode_restore() {
 		total_files++
 	}
 
-	console.log(`\n\x1b[32mTotal: ${pluralize(total_files, 'image')} restored\x1b[0m`)
+	console.log(`\n\x1b[92mTotal: ${pluralize(total_files, 'image')} restored\x1b[0m`)
 }
 
 async function mode_copy() {
@@ -218,7 +218,7 @@ if (OWNER && directories_to_chown.length) {
 // log the total bytes saved
 if (total_bytes_saved && total_files) {
 	console.log(
-		`\n\x1b[32mTotal: ${get_megabytes(total_bytes_saved)}MB saved from ${pluralize(
+		`\n\x1b[92mTotal: ${get_megabytes(total_bytes_saved)}MB saved from ${pluralize(
 			total_files,
 			'image'
 		)}\x1b[0m`
