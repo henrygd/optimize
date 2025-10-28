@@ -1,9 +1,9 @@
 {
   "dependencies": {
-    "@henrygd/queue": "^1.0.3",
-    "sharp": "^0.33.4"
+    "@henrygd/queue": "^1.1.1",
+    "sharp": "^0.34.4"
   },
   "devDependencies": {
-    "@types/bun": "^1.1.4"
+    "@types/bun": "latest"
   }
 }
